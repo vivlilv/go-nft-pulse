@@ -1,0 +1,362 @@
+[
+  {
+    "name": "ideal listing",
+    "input": {
+      "ref": null,
+      "event": "item_listed",
+      "payload": {
+        "version": 1,
+        "payload": {
+          "base_price": "25378390000000000",
+          "chain": "ethereum",
+          "collection": { "slug": "fwogs" },
+          "event_timestamp": "2026-04-19T19:15:39.132000Z",
+          "expiration_date": "2026-04-19T19:26:38.000000Z",
+          "is_private": false,
+          "item": {
+            "chain": { "name": "ethereum" },
+            "metadata": {
+              "animation_url": null,
+              "background_color": null,
+              "description": "Wut The Fwog",
+              "image_url": "https://i2c.seadn.io/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/df7b276e2ce46e554833a977bb272b/6bdf7b276e2ce46e554833a977bb272b.png",
+              "metadata_url": null,
+              "name": "Fwog #3329",
+              "traits": [
+                { "trait_type": "Body", "value": "Kimono" },
+                { "trait_type": "Eyes", "value": "None" },
+                { "trait_type": "Head", "value": "Red Bucket Hat" },
+                { "trait_type": "Skin", "value": "Og" },
+                { "trait_type": "Background", "value": "Rose Nude" },
+                { "trait_type": "Skin Layer", "value": "None" }
+              ]
+            },
+            "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329",
+            "permalink": "https://opensea.io/item/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329"
+          },
+          "listing_date": "2026-04-19T19:15:38.000000Z",
+          "listing_type": null,
+          "maker": { "address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6" },
+          "order_hash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+          "payment_token": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18,
+            "eth_price": "0.02537839",
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "usd_price": "58.3644599703"
+          },
+          "protocol_address": "0x0000000000000068f116a894984e2db1123eb395",
+          "protocol_data": {
+            "parameters": {
+              "conduitKey": "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000",
+              "consideration": [
+                {
+                  "endAmount": "23728794650000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+                  "startAmount": "23728794650000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "253783900000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x0000a26b00c1f0df003000390027140000faa719",
+                  "startAmount": "253783900000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "1395811450000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x6dad8c31ffd65310a3135080cf70e23f2fca52a2",
+                  "startAmount": "1395811450000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "counter": "0x0",
+              "endTime": "1776626798",
+              "offer": [
+                {
+                  "endAmount": "1",
+                  "identifierOrCriteria": "3329",
+                  "itemType": 2,
+                  "startAmount": "1",
+                  "token": "0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8"
+                }
+              ],
+              "offerer": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+              "orderType": 3,
+              "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "startTime": "1776626138",
+              "totalOriginalConsiderationItems": 3,
+              "zone": "0x000056f7000000ece9003ca63978907a00ffd100",
+              "zoneHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "signature": "0x21565727bdfea1fbf5f38924db0a29488bed990b544f585851ba3dda7a51dabf1d144311d024ea8cbabc768ff9c9ada6bcfe3d8d144e498e552c3fcef5aa0e11"
+          },
+          "quantity": 1,
+          "taker": { "address": "0x0000000000000000000000000000000000000000" }
+        },
+        "event_type": "item_listed",
+        "sent_at": "2026-04-19T19:15:39.432000Z"
+      },
+      "topic": "collection:fwogs"
+    },
+    "expected": {
+      "event_type": "item_listed",
+      "priceWei": 25378390000000000,
+      "slug": "fwogs",
+      "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329",
+      "token_id": 3329,
+      "maker_address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+      "orderHash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+      "priceUsd": 58.3644599703,
+      "endTime": 1776626798
+    },
+    "expecte_err": false
+  },
+
+  {
+    "name": "Corrupted nftID - expect error on parsing(GetTokenID)",
+    "input": {
+      "ref": null,
+      "event": "item_listed",
+      "payload": {
+        "version": 1,
+        "payload": {
+          "base_price": "25378390000000000",
+          "chain": "ethereum",
+          "collection": { "slug": "fwogs" },
+          "event_timestamp": "2026-04-19T19:15:39.132000Z",
+          "expiration_date": "2026-04-19T19:26:38.000000Z",
+          "is_private": false,
+          "item": {
+            "chain": { "name": "ethereum" },
+            "metadata": {
+              "animation_url": null,
+              "background_color": null,
+              "description": "Wut The Fwog",
+              "image_url": "https://i2c.seadn.io/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/df7b276e2ce46e554833a977bb272b/6bdf7b276e2ce46e554833a977bb272b.png",
+              "metadata_url": null,
+              "name": "Fwog #3329",
+              "traits": [
+                { "trait_type": "Body", "value": "Kimono" },
+                { "trait_type": "Eyes", "value": "None" },
+                { "trait_type": "Head", "value": "Red Bucket Hat" },
+                { "trait_type": "Skin", "value": "Og" },
+                { "trait_type": "Background", "value": "Rose Nude" },
+                { "trait_type": "Skin Layer", "value": "None" }
+              ]
+            },
+            "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/14sometext88",
+            "permalink": "https://opensea.io/item/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329"
+          },
+          "listing_date": "2026-04-19T19:15:38.000000Z",
+          "listing_type": null,
+          "maker": { "address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6" },
+          "order_hash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+          "payment_token": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18,
+            "eth_price": "0.02537839",
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "usd_price": "58.3644599703"
+          },
+          "protocol_address": "0x0000000000000068f116a894984e2db1123eb395",
+          "protocol_data": {
+            "parameters": {
+              "conduitKey": "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000",
+              "consideration": [
+                {
+                  "endAmount": "23728794650000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+                  "startAmount": "23728794650000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "253783900000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x0000a26b00c1f0df003000390027140000faa719",
+                  "startAmount": "253783900000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "1395811450000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x6dad8c31ffd65310a3135080cf70e23f2fca52a2",
+                  "startAmount": "1395811450000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "counter": "0x0",
+              "endTime": "1776626798",
+              "offer": [
+                {
+                  "endAmount": "1",
+                  "identifierOrCriteria": "3329",
+                  "itemType": 2,
+                  "startAmount": "1",
+                  "token": "0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8"
+                }
+              ],
+              "offerer": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+              "orderType": 3,
+              "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "startTime": "1776626138",
+              "totalOriginalConsiderationItems": 3,
+              "zone": "0x000056f7000000ece9003ca63978907a00ffd100",
+              "zoneHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "signature": "0x21565727bdfea1fbf5f38924db0a29488bed990b544f585851ba3dda7a51dabf1d144311d024ea8cbabc768ff9c9ada6bcfe3d8d144e498e552c3fcef5aa0e11"
+          },
+          "quantity": 1,
+          "taker": { "address": "0x0000000000000000000000000000000000000000" }
+        },
+        "event_type": "item_listed",
+        "sent_at": "2026-04-19T19:15:39.432000Z"
+      },
+      "topic": "collection:fwogs"
+    },
+    "expected": {
+      "event_type": "item_listed",
+      "priceWei": 25378390000000000,
+      "slug": "fwogs",
+      "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329",
+      "token_id": 3329,
+      "maker_address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+      "orderHash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+      "priceUsd": 58.3644599703,
+      "endTime": 1776626798
+    },
+    "expect_err": true,
+    "expect_err_msg": "failed to extract token ID"
+  },
+
+  {
+    "name": "Missing base price - expect error on parsing(String to big.Int)",
+    "input": {
+      "ref": null,
+      "event": "item_listed",
+      "payload": {
+        "version": 1,
+        "payload": {
+          "chain": "ethereum",
+          "collection": { "slug": "fwogs" },
+          "event_timestamp": "2026-04-19T19:15:39.132000Z",
+          "expiration_date": "2026-04-19T19:26:38.000000Z",
+          "is_private": false,
+          "item": {
+            "chain": { "name": "ethereum" },
+            "metadata": {
+              "animation_url": null,
+              "background_color": null,
+              "description": "Wut The Fwog",
+              "image_url": "https://i2c.seadn.io/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/df7b276e2ce46e554833a977bb272b/6bdf7b276e2ce46e554833a977bb272b.png",
+              "metadata_url": null,
+              "name": "Fwog #3329",
+              "traits": [
+                { "trait_type": "Body", "value": "Kimono" },
+                { "trait_type": "Eyes", "value": "None" },
+                { "trait_type": "Head", "value": "Red Bucket Hat" },
+                { "trait_type": "Skin", "value": "Og" },
+                { "trait_type": "Background", "value": "Rose Nude" },
+                { "trait_type": "Skin Layer", "value": "None" }
+              ]
+            },
+            "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329",
+            "permalink": "https://opensea.io/item/ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329"
+          },
+          "listing_date": "2026-04-19T19:15:38.000000Z",
+          "listing_type": null,
+          "maker": { "address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6" },
+          "order_hash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+          "payment_token": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18,
+            "eth_price": "0.02537839",
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "usd_price": "58.3644599703"
+          },
+          "protocol_address": "0x0000000000000068f116a894984e2db1123eb395",
+          "protocol_data": {
+            "parameters": {
+              "conduitKey": "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b8104250f0000",
+              "consideration": [
+                {
+                  "endAmount": "23728794650000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+                  "startAmount": "23728794650000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "253783900000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x0000a26b00c1f0df003000390027140000faa719",
+                  "startAmount": "253783900000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                },
+                {
+                  "endAmount": "1395811450000000",
+                  "identifierOrCriteria": "0",
+                  "itemType": 0,
+                  "recipient": "0x6dad8c31ffd65310a3135080cf70e23f2fca52a2",
+                  "startAmount": "1395811450000000",
+                  "token": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "counter": "0x0",
+              "endTime": "1776626798",
+              "offer": [
+                {
+                  "endAmount": "1",
+                  "identifierOrCriteria": "3329",
+                  "itemType": 2,
+                  "startAmount": "1",
+                  "token": "0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8"
+                }
+              ],
+              "offerer": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+              "orderType": 3,
+              "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "startTime": "1776626138",
+              "totalOriginalConsiderationItems": 3,
+              "zone": "0x000056f7000000ece9003ca63978907a00ffd100",
+              "zoneHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            "signature": "0x21565727bdfea1fbf5f38924db0a29488bed990b544f585851ba3dda7a51dabf1d144311d024ea8cbabc768ff9c9ada6bcfe3d8d144e498e552c3fcef5aa0e11"
+          },
+          "quantity": 1,
+          "taker": { "address": "0x0000000000000000000000000000000000000000" }
+        },
+        "event_type": "item_listed",
+        "sent_at": "2026-04-19T19:15:39.432000Z"
+      },
+      "topic": "collection:fwogs"
+    },
+    "expected": {
+      "event_type": "item_listed",
+      "priceWei": 25378390000000000,
+      "slug": "fwogs",
+      "nft_id": "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/3329",
+      "token_id": 3329,
+      "maker_address": "0xfee36c593a39e68efab66c7ca0a38242344f68e6",
+      "orderHash": "0x5a54dda8db6ddd747fb8c8de49e3de340bb023f47e3b0e1d7d9637a911f0e5b0",
+      "priceUsd": 58.3644599703,
+      "endTime": 1776626798
+    },
+    "expect_err": true,
+    "expect_err_msg": "failed to convert base price to big.Int"
+  }
+]
