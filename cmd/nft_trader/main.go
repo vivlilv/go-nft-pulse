@@ -1,12 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
-	events_opensea "github.com/vivlilv/go_nft_trader/internal/events/opensea"
+	domain_state "github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
 func main() {
 	fmt.Println("Starting NFT Trader...")
-	events_opensea.ListenEvents()
+
+	state := domain_state.NewState("item_flip", "offer", "items.json")
+	b, _ := json.MarshalIndent(state, "", "  ")
+	fmt.Println(string(b))
+	// events_opensea.ListenEvents()
 }
