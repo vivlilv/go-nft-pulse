@@ -307,9 +307,10 @@ type ItemSold struct {
 	MakerAddress string
 	TakerAddress string
 	OrderHash    string
-	SalePriceWei *big.Int
+	PriceWei     *big.Int
 	UsdPrice     string
 	ClosingDate  string
+	EndTime      int64
 	TxHash       string
 }
 
@@ -317,8 +318,9 @@ func (e *ItemSold) UnmarshalJSON(data []byte) error {
 	type msg struct {
 		Payload struct {
 			Payload struct {
-				Chain      string `json:"chain"`
-				Collection struct {
+				Chain          string `json:"chain"`
+				EventTimestamp string `json:"event_timestamp"`
+				Collection     struct {
 					Slug string `json:"slug"`
 				} `json:"collection"`
 				ClosingDate string `json:"closing_date"`
@@ -358,7 +360,12 @@ func (e *ItemSold) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unmarshalJSON msg;failed to convert sale price to big.Int: %w", err)
 	}
 
-	e.EventType = "item_sold"
+	endTime, err := strconv.Atoi(temp.Payload.Payload.EventTimestamp)
+	if err != nil {
+		return err
+	}
+
+	e.EndTime = int64(endTime)
 	e.Slug = temp.Payload.Payload.Collection.Slug
 	e.Chain = temp.Payload.Payload.Chain
 	e.NftID = temp.Payload.Payload.Item.NftID
@@ -366,7 +373,7 @@ func (e *ItemSold) UnmarshalJSON(data []byte) error {
 	e.MakerAddress = temp.Payload.Payload.Maker.Address
 	e.TakerAddress = temp.Payload.Payload.Taker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
-	e.SalePriceWei = priceWei
+	e.PriceWei = priceWei
 	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
 	e.ClosingDate = temp.Payload.Payload.ClosingDate
 	e.TxHash = temp.Payload.Payload.Transaction.Hash
