@@ -42,20 +42,20 @@ func applyOffer(state *domain.State, key domain.NftID, offer domain.OfferBase) {
 	if item.TopOffer.PriceWei.Cmp(offer.PriceWei) == -1 {
 		item.TopOffer = offer
 	}
-	if offer.Maker == domain.MyAddress {
+	if offer.Maker == domain.MyWallet.Address {
 		item.MyOffer = offer
 	}
 
 	state.Items[key] = item // single write back
 }
 
-func clearOffer(state *domain.State, key domain.NftID, offer domain.OfferBase) {
+func clearOffer(state *domain.State, key domain.NftID, orderHash string) {
 	item := state.Items[key]
 
-	if item.TopOffer.OrderHash == offer.OrderHash {
+	if item.TopOffer.OrderHash == orderHash {
 		item.TopOffer = domain.OfferBase{} //Schedule refetch
 	}
-	if offer.Maker == domain.MyAddress {
+	if item.MyOffer.OrderHash == orderHash {
 		item.MyOffer = domain.OfferBase{}
 	}
 

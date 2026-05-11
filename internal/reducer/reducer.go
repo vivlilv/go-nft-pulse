@@ -14,7 +14,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
 			ExpirationTime: e.EndTime,
-			Maker:          e.MakerAddress,
+			Maker:          domain.Address(e.MakerAddress),
 			OrderHash:      e.OrderHash,
 		}
 
@@ -27,7 +27,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
 			ExpirationTime: e.EndTime,
-			Maker:          e.MakerAddress,
+			Maker:          domain.Address(e.MakerAddress),
 			OrderHash:      e.OrderHash,
 		}
 
@@ -41,7 +41,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
 			ExpirationTime: e.EndTime,
-			Maker:          e.MakerAddress,
+			Maker:          domain.Address(e.MakerAddress),
 			OrderHash:      e.OrderHash,
 		}
 
@@ -51,28 +51,16 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		}
 		return state
 
-	case *domain.ItemSoldEvent:
-		offer := domain.OfferBase{
-			PriceWei:       e.PriceWei,
-			ExpirationTime: e.EndTime,
-			Maker:          e.MakerAddress,
-			OrderHash:      e.OrderHash,
-		}
+	case *domain.ItemSoldEvent: //FIXME - can be offer or listing sold;
 
 		key := domain.NftID(e.NftID)
-		clearOffer(&state, key, offer)
+		clearOffer(&state, key, e.OrderHash)
 		return state
 
-	case *domain.ItemCancelledEvent:
-		offer := domain.OfferBase{
-			PriceWei:       e.PriceWei,
-			ExpirationTime: e.EndTime,
-			Maker:          e.MakerAddress,
-			OrderHash:      e.OrderHash,
-		}
+	case *domain.ItemCancelledEvent: //FIXME - can be offer or listing cancel;
 
 		key := domain.NftID(e.NftID)
-		clearOffer(&state, key, offer)
+		clearOffer(&state, key, e.OrderHash)
 		return state
 
 	default:
