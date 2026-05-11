@@ -5,10 +5,24 @@ import (
 	"log"
 	"math/big"
 	"os"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
+type MyWalletConfig struct {
+	Address Address `envconfig:"MY_ADDRESS" required:"true"`
+}
+
+var MyWallet = &MyWalletConfig{}
+
+func init() {
+	if err := envconfig.Process("", MyWallet); err != nil {
+		log.Fatalf("failed to load wallet config: %v", err)
+	}
+}
+
 type NftID string
-type address string
+type Address string
 type TraitCriterion struct {
 	Name string `json:"trait_name"`
 	Type string `json:"trait_type"`
@@ -28,20 +42,15 @@ type ItemState struct {
 	MaxBidAllowedWei *big.Int
 	OfferStepWei     *big.Int
 	TopOffer         OfferBase
-	MyOffer          *ItemOffer       //YAGNI - for now only per item bid;* if nil
+	MyOffer          OfferBase        //YAGNI - for now only per item bid;* if nil
 	Traits           []TraitCriterion //each nft has traits;to query trait offers
 }
 
-type Offer interface {
-	//TODO: add methods like GetPriceForItem(1), HandlelExpiration(), etc
-}
-
 type OfferBase struct {
-	BasePrice      *big.Int
-	QuantityMin    int
-	QuantityMax    int
+	PriceWei       *big.Int
+	OrderHash      string
 	ExpirationTime int64
-	Maker          address
+	Maker          Address
 }
 
 type ItemOffer struct {
