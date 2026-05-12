@@ -30,7 +30,7 @@ type CollectionOfferEvent struct {
 	Chain        string
 	MakerAddress string
 	OrderHash    string
-	UsdPrice     string
+	UsdPrice     float64
 	EndTime      int64
 }
 
@@ -43,24 +43,22 @@ type ItemCancelledEvent struct {
 	TokenID        int
 	MakerAddress   string
 	OrderHash      string
-	UsdPrice       string
+	UsdPrice       float64
 	ExpirationDate string
 	ListingDate    string
 }
 
 type ItemReceivedOfferEvent struct {
-	EventType      string
-	PriceWei       *big.Int
-	Slug           string
-	Chain          string
-	NftID          string
-	TokenID        int
-	MakerAddress   string
-	OrderHash      string
-	UsdPrice       string
-	EndTime        int64
-	CreatedDate    string
-	ExpirationDate string
+	EventType    string
+	PriceWei     *big.Int
+	Slug         string
+	Chain        string
+	NftID        string
+	TokenID      int
+	MakerAddress string
+	OrderHash    string
+	UsdPrice     float64
+	EndTime      int64
 }
 
 type ItemSoldEvent struct {
@@ -73,7 +71,7 @@ type ItemSoldEvent struct {
 	TakerAddress string
 	OrderHash    string
 	PriceWei     *big.Int
-	UsdPrice     string
+	UsdPrice     float64
 	ClosingDate  string
 	EndTime      int64
 	TxHash       string
@@ -87,7 +85,7 @@ type TraitOfferEvent struct {
 	PriceWei          *big.Int
 	MakerAddress      string
 	OrderHash         string
-	UsdPrice          string
+	UsdPrice          float64
 	CreatedDate       string
 	ExpirationDate    string
 	EndTime           int64

@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
 func GetEventType(data []byte) string {
@@ -22,7 +24,7 @@ func GetEventType(data []byte) string {
 	return msg.EventType
 }
 
-func ProcessEvent(eventType string, data []byte) (Event, error) {
+func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
 	var e Event
 	switch eventType {
 	case "item_listed":
@@ -48,9 +50,13 @@ func ProcessEvent(eventType string, data []byte) (Event, error) {
 	if err != nil {
 		log.Printf("Unmarshaling event data: %v", err)
 	}
-	b, _ := json.MarshalIndent(e, "", "  ")
+	event, err := e.ToDomainEvent()
+	if err != nil {
+		log.Printf("Converting to domain event: %v", err)
+	}
+	b, _ := json.MarshalIndent(event, "", "  ")
 	fmt.Println(string(b))
-	return e, err
+	return event, err
 }
 
 func SetupListener() *Listener {
@@ -75,17 +81,21 @@ func ReadMessages(listener *Listener, ch chan<- []byte, errChan chan<- error) {
 
 func HandleEvents(
 	listener *Listener,
-	ch chan []byte,
+	rawCh chan []byte,
+	eventsCh chan<- domain.Event,
 	errChanKeepAlive chan error,
 	quit chan os.Signal,
 ) {
 	go func() {
 		for {
 			select {
-			case data := <-ch:
+			case data := <-rawCh:
 				fmt.Println(string(data))
 				eventType := GetEventType(data)
-				ProcessEvent(eventType, data)
+				event, err := ProcessEvent(eventType, data)
+				if err == nil {
+					eventsCh <- event
+				}
 			case <-quit:
 				if err := listener.Close(); err != nil { //closing the websocket.Conn will stop readMsg cycle
 					fmt.Println("Error closing connection:", err)
@@ -101,26 +111,25 @@ func HandleEvents(
 	}()
 }
 
-func ListenEvents() {
+func ListenEvents() (<-chan domain.Event, <-chan struct{}) {
 
 	listener := SetupListener()
 
-	// //subscribe to collection events
-	err := listener.Subscribe("fwogs")
+	err := listener.Subscribe("megalio-16")
 	if err != nil {
 		log.Fatal("during ListenEvents: ", err)
 	}
 
-	ch := make(chan []byte) //events data channel
+	rawCh := make(chan []byte)          //raw ws events data channel
+	eventsCh := make(chan domain.Event) //processed events channel
 	quit := make(chan os.Signal, 1)
 	errChanKeepAlive := make(chan error) //to catch errors from goroutine
 	signal.Notify(quit, os.Interrupt)
 
-	//keepalive in the background
 	listener.KeepAlive(errChanKeepAlive)
 
-	ReadMessages(listener, ch, errChanKeepAlive)
-	HandleEvents(listener, ch, errChanKeepAlive, quit)
+	ReadMessages(listener, rawCh, errChanKeepAlive)
+	HandleEvents(listener, rawCh, eventsCh, errChanKeepAlive, quit)
 
-	<-listener.Done()
+	return eventsCh, listener.Done()
 }

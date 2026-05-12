@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+
+	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
 type Event interface {
 	UnmarshalJSON(data []byte) error
+	ToDomainEvent() (domain.Event, error)
 }
 
 type WSMessage struct {
@@ -25,6 +28,20 @@ type ItemListed struct {
 	OrderHash    string
 	UsdPrice     float64
 	EndTime      int64
+}
+
+func (e *ItemListed) ToDomainEvent() (domain.Event, error) {
+	return domain.ItemListedEvent{
+		EventType:    e.EventType,
+		PriceWei:     e.PriceWei,
+		Slug:         e.Slug,
+		NftID:        e.NftID,
+		TokenID:      e.TokenID,
+		MakerAddress: e.MakerAddress,
+		OrderHash:    e.OrderHash,
+		UsdPrice:     e.UsdPrice,
+		EndTime:      e.EndTime,
+	}, nil
 }
 
 func (e *ItemListed) UnmarshalJSON(data []byte) error {
@@ -97,8 +114,21 @@ type CollectionOffer struct {
 	Chain        string
 	MakerAddress string
 	OrderHash    string
-	UsdPrice     string
+	UsdPrice     float64
 	EndTime      int64
+}
+
+func (e *CollectionOffer) ToDomainEvent() (domain.Event, error) {
+	return domain.CollectionOfferEvent{
+		EventType:    e.EventType,
+		PriceWei:     e.PriceWei,
+		Slug:         e.Slug,
+		Chain:        e.Chain,
+		MakerAddress: e.MakerAddress,
+		OrderHash:    e.OrderHash,
+		UsdPrice:     e.UsdPrice,
+		EndTime:      e.EndTime,
+	}, nil
 }
 
 func (e *CollectionOffer) UnmarshalJSON(data []byte) error {
@@ -135,14 +165,19 @@ func (e *CollectionOffer) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("unmarshalJSON collection offer;failed to convert base price to big.Int: %w", err)
 	}
+
+	priceUsd, err := strconv.ParseFloat(temp.Payload.Payload.PaymentToken.UsdPrice, 64)
+	if err != nil {
+		return err
+	}
+
 	e.EventType = "collection_offer"
 	e.PriceWei = priceWei
 	e.Slug = temp.Payload.Payload.Collection.Slug
 	e.Chain = temp.Payload.Payload.Chain
 	e.MakerAddress = temp.Payload.Payload.Maker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
-	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
-
+	e.UsdPrice = priceUsd
 	endTime, err := strconv.Atoi(temp.Payload.Payload.ProtocolData.Parameters.EndTime)
 	if err != nil {
 		return err
@@ -153,17 +188,29 @@ func (e *CollectionOffer) UnmarshalJSON(data []byte) error {
 }
 
 type ItemCancelled struct {
-	EventType      string
-	PriceWei       *big.Int
-	Slug           string
-	Chain          string
-	NftID          string
-	TokenID        int
-	MakerAddress   string
-	OrderHash      string
-	UsdPrice       string
-	ExpirationDate string
-	ListingDate    string
+	EventType    string
+	PriceWei     *big.Int
+	Slug         string
+	Chain        string
+	NftID        string
+	TokenID      int
+	MakerAddress string
+	OrderHash    string
+	UsdPrice     float64
+}
+
+func (e *ItemCancelled) ToDomainEvent() (domain.Event, error) {
+	return domain.ItemCancelledEvent{
+		EventType:    e.EventType,
+		PriceWei:     e.PriceWei,
+		Slug:         e.Slug,
+		Chain:        e.Chain,
+		NftID:        e.NftID,
+		TokenID:      e.TokenID,
+		MakerAddress: e.MakerAddress,
+		OrderHash:    e.OrderHash,
+		UsdPrice:     e.UsdPrice,
+	}, nil
 }
 
 func (e *ItemCancelled) UnmarshalJSON(data []byte) error {
@@ -175,9 +222,7 @@ func (e *ItemCancelled) UnmarshalJSON(data []byte) error {
 				Collection struct {
 					Slug string `json:"slug"`
 				} `json:"collection"`
-				ExpirationDate string `json:"expiration_date"`
-				ListingDate    string `json:"listing_date"`
-				Item           struct {
+				Item struct {
 					NftID string `json:"nft_id"`
 				} `json:"item"`
 				Maker struct {
@@ -205,6 +250,12 @@ func (e *ItemCancelled) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("unmarshalJSON item cancelled;failed to extract token ID: %w", err)
 	}
+
+	priceUsd, err := strconv.ParseFloat(temp.Payload.Payload.PaymentToken.UsdPrice, 64)
+	if err != nil {
+		return err
+	}
+
 	e.EventType = "item_cancelled"
 	e.PriceWei = priceWei
 	e.Slug = temp.Payload.Payload.Collection.Slug
@@ -213,26 +264,36 @@ func (e *ItemCancelled) UnmarshalJSON(data []byte) error {
 	e.TokenID = tokenID
 	e.MakerAddress = temp.Payload.Payload.Maker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
-	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
-	e.ExpirationDate = temp.Payload.Payload.ExpirationDate
-	e.ListingDate = temp.Payload.Payload.ListingDate
+	e.UsdPrice = priceUsd
 
 	return nil
 }
 
 type ItemReceivedOffer struct {
-	EventType      string
-	PriceWei       *big.Int
-	Slug           string
-	Chain          string
-	NftID          string
-	TokenID        int
-	MakerAddress   string
-	OrderHash      string
-	UsdPrice       string
-	EndTime        int64
-	CreatedDate    string
-	ExpirationDate string
+	EventType    string
+	PriceWei     *big.Int
+	Slug         string
+	Chain        string
+	NftID        string
+	TokenID      int
+	MakerAddress string
+	OrderHash    string
+	UsdPrice     float64
+	EndTime      int64
+}
+
+func (e *ItemReceivedOffer) ToDomainEvent() (domain.Event, error) {
+	return domain.ItemReceivedOfferEvent{
+		EventType:    e.EventType,
+		PriceWei:     e.PriceWei,
+		Slug:         e.Slug,
+		NftID:        e.NftID,
+		TokenID:      e.TokenID,
+		MakerAddress: e.MakerAddress,
+		OrderHash:    e.OrderHash,
+		UsdPrice:     e.UsdPrice,
+		EndTime:      e.EndTime,
+	}, nil
 }
 
 func (e *ItemReceivedOffer) UnmarshalJSON(data []byte) error {
@@ -279,6 +340,12 @@ func (e *ItemReceivedOffer) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("unmarshalJSON item received offer;failed to extract token ID: %w", err)
 	}
+
+	priceUsd, err := strconv.ParseFloat(temp.Payload.Payload.PaymentToken.UsdPrice, 64)
+	if err != nil {
+		return err
+	}
+
 	e.EventType = "item_received_offer"
 	e.PriceWei = priceWei
 	e.Slug = temp.Payload.Payload.Collection.Slug
@@ -287,7 +354,7 @@ func (e *ItemReceivedOffer) UnmarshalJSON(data []byte) error {
 	e.TokenID = tokenID
 	e.MakerAddress = temp.Payload.Payload.Maker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
-	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
+	e.UsdPrice = priceUsd
 
 	endTime, err := strconv.Atoi(temp.Payload.Payload.ProtocolData.Parameters.EndTime)
 	if err != nil {
@@ -308,10 +375,25 @@ type ItemSold struct {
 	TakerAddress string
 	OrderHash    string
 	PriceWei     *big.Int
-	UsdPrice     string
-	ClosingDate  string
+	UsdPrice     float64
 	EndTime      int64
 	TxHash       string
+}
+
+func (e *ItemSold) ToDomainEvent() (domain.Event, error) {
+	return domain.ItemSoldEvent{
+		EventType:    e.EventType,
+		Slug:         e.Slug,
+		NftID:        e.NftID,
+		TokenID:      e.TokenID,
+		MakerAddress: e.MakerAddress,
+		TakerAddress: e.TakerAddress,
+		OrderHash:    e.OrderHash,
+		PriceWei:     e.PriceWei,
+		UsdPrice:     e.UsdPrice,
+		EndTime:      e.EndTime,
+		TxHash:       e.TxHash,
+	}, nil
 }
 
 func (e *ItemSold) UnmarshalJSON(data []byte) error {
@@ -365,6 +447,11 @@ func (e *ItemSold) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	priceUsd, err := strconv.ParseFloat(temp.Payload.Payload.PaymentToken.UsdPrice, 64)
+	if err != nil {
+		return err
+	}
+
 	e.EndTime = int64(endTime)
 	e.Slug = temp.Payload.Payload.Collection.Slug
 	e.Chain = temp.Payload.Payload.Chain
@@ -374,31 +461,34 @@ func (e *ItemSold) UnmarshalJSON(data []byte) error {
 	e.TakerAddress = temp.Payload.Payload.Taker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
 	e.PriceWei = priceWei
-	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
-	e.ClosingDate = temp.Payload.Payload.ClosingDate
+	e.UsdPrice = priceUsd
 	e.TxHash = temp.Payload.Payload.Transaction.Hash
 
 	return nil
 }
 
-type TraitCriterion struct {
-	Name string `json:"trait_name"`
-	Type string `json:"trait_type"`
-}
-
 type TraitOffer struct {
 	EventType         string
 	Slug              string
-	Chain             string
-	ContractAddr      string
 	PriceWei          *big.Int
 	MakerAddress      string
 	OrderHash         string
-	UsdPrice          string
-	CreatedDate       string
-	ExpirationDate    string
+	UsdPrice          float64
 	EndTime           int64
-	TraitCriteriaList []TraitCriterion
+	TraitCriteriaList []domain.TraitCriterion
+}
+
+func (e *TraitOffer) ToDomainEvent() (domain.Event, error) {
+	return domain.TraitOfferEvent{
+		EventType:         e.EventType,
+		Slug:              e.Slug,
+		PriceWei:          e.PriceWei,
+		MakerAddress:      e.MakerAddress,
+		OrderHash:         e.OrderHash,
+		UsdPrice:          e.UsdPrice,
+		EndTime:           e.EndTime,
+		TraitCriteriaList: e.TraitCriteriaList,
+	}, nil
 }
 
 func (e *TraitOffer) UnmarshalJSON(data []byte) error {
@@ -456,15 +546,16 @@ func (e *TraitOffer) UnmarshalJSON(data []byte) error {
 		e.PriceWei = price
 	}
 
+	priceUsd, err := strconv.ParseFloat(temp.Payload.Payload.PaymentToken.UsdPrice, 64)
+	if err != nil {
+		return err
+	}
+
 	e.EventType = "trait_offer"
 	e.Slug = temp.Payload.Payload.Collection.Slug
-	e.Chain = temp.Payload.Payload.Chain
-	e.ContractAddr = temp.Payload.Payload.AssetContractCriteria.Address
 	e.MakerAddress = temp.Payload.Payload.Maker.Address
 	e.OrderHash = temp.Payload.Payload.OrderHash
-	e.UsdPrice = temp.Payload.Payload.PaymentToken.UsdPrice
-	e.CreatedDate = temp.Payload.Payload.CreatedDate
-	e.ExpirationDate = temp.Payload.Payload.ExpirationDate
+	e.UsdPrice = priceUsd
 
 	endTime, err := strconv.Atoi(temp.Payload.Payload.ProtocolData.Parameters.EndTime)
 	if err != nil {
@@ -473,9 +564,9 @@ func (e *TraitOffer) UnmarshalJSON(data []byte) error {
 	e.EndTime = int64(endTime)
 
 	// Map trait_criteria_list
-	e.TraitCriteriaList = make([]TraitCriterion, 0, len(temp.Payload.Payload.TraitCriteriaList))
+	e.TraitCriteriaList = make([]domain.TraitCriterion, 0, len(temp.Payload.Payload.TraitCriteriaList))
 	for _, tc := range temp.Payload.Payload.TraitCriteriaList {
-		e.TraitCriteriaList = append(e.TraitCriteriaList, TraitCriterion{
+		e.TraitCriteriaList = append(e.TraitCriteriaList, domain.TraitCriterion{
 			Name: tc.TraitName,
 			Type: tc.TraitType,
 		})
