@@ -9,7 +9,7 @@ import (
 func Reduce(state domain.State, event domain.Event) domain.State {
 	switch e := event.(type) {
 
-	case *domain.ItemReceivedOfferEvent:
+	case domain.ItemReceivedOfferEvent:
 		key := domain.NftID(e.NftID)
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
@@ -22,7 +22,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 
 		return state
 
-	case *domain.TraitOfferEvent:
+	case domain.TraitOfferEvent:
 		traitsFilter := e.TraitCriteriaList
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
@@ -37,7 +37,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		}
 		return state
 
-	case *domain.CollectionOfferEvent:
+	case domain.CollectionOfferEvent:
 		offer := domain.OfferBase{
 			PriceWei:       e.PriceWei,
 			ExpirationTime: e.EndTime,
@@ -51,13 +51,13 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		}
 		return state
 
-	case *domain.ItemSoldEvent: //FIXME - can be offer or listing sold;
+	case domain.ItemSoldEvent: //FIXME - can be offer or listing sold;
 
 		key := domain.NftID(e.NftID)
 		clearOffer(&state, key, e.OrderHash)
 		return state
 
-	case *domain.ItemCancelledEvent: //FIXME - can be offer or listing cancel;
+	case domain.ItemCancelledEvent: //FIXME - can be offer or listing cancel;
 
 		key := domain.NftID(e.NftID)
 		clearOffer(&state, key, e.OrderHash)

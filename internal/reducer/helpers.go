@@ -1,6 +1,8 @@
 package reducer
 
-import "github.com/vivlilv/go_nft_trader/internal/domain"
+import (
+	"github.com/vivlilv/go_nft_trader/internal/domain"
+)
 
 func filterItemsByTraits(traits []domain.TraitCriterion, state *domain.State) []domain.NftID {
 	itemsList := []domain.NftID{}
@@ -37,9 +39,12 @@ func selectAllItems(state *domain.State) []domain.NftID {
 }
 
 func applyOffer(state *domain.State, key domain.NftID, offer domain.OfferBase) {
-	item := state.Items[key] // fresh read every time
+	item, exists := state.Items[key] // fresh read every time
+	if !exists {
+		return
+	}
 
-	if item.TopOffer.PriceWei.Cmp(offer.PriceWei) == -1 {
+	if item.TopOffer.PriceWei == nil || item.TopOffer.PriceWei.Cmp(offer.PriceWei) == -1 {
 		item.TopOffer = offer
 	}
 	if offer.Maker == domain.MyWallet.Address {
@@ -50,7 +55,10 @@ func applyOffer(state *domain.State, key domain.NftID, offer domain.OfferBase) {
 }
 
 func clearOffer(state *domain.State, key domain.NftID, orderHash string) {
-	item := state.Items[key]
+	item, exists := state.Items[key] // fresh read every time
+	if !exists {
+		return
+	}
 
 	if item.TopOffer.OrderHash == orderHash {
 		item.TopOffer = domain.OfferBase{} //Schedule refetch

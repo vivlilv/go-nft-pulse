@@ -42,7 +42,7 @@ func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
 	case "trait_offer":
 		e = &TraitOffer{}
 	default:
-		log.Printf("Unknown event type: %s", eventType)
+		// log.Printf("Unknown event type: %s", eventType)
 		return nil, fmt.Errorf("unknown event type: %s", eventType)
 	}
 
@@ -55,7 +55,7 @@ func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
 		log.Printf("Converting to domain event: %v", err)
 	}
 	b, _ := json.MarshalIndent(event, "", "  ")
-	fmt.Println(string(b))
+	log.Println(string(b))
 	return event, err
 }
 
@@ -90,7 +90,7 @@ func HandleEvents(
 		for {
 			select {
 			case data := <-rawCh:
-				fmt.Println(string(data))
+				// fmt.Println(string(data))
 				eventType := GetEventType(data)
 				event, err := ProcessEvent(eventType, data)
 				if err == nil {
@@ -111,11 +111,10 @@ func HandleEvents(
 	}()
 }
 
-func ListenEvents() (<-chan domain.Event, <-chan struct{}) {
-
+func ListenEvents(collectionSlug string) (<-chan domain.Event, <-chan struct{}) {
 	listener := SetupListener()
 
-	err := listener.Subscribe("megalio-16")
+	err := listener.Subscribe(collectionSlug)
 	if err != nil {
 		log.Fatal("during ListenEvents: ", err)
 	}
