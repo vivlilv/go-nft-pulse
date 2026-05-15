@@ -2,3 +2,4 @@
 testdata/*
 items.json
 *.md
+*.log

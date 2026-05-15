@@ -41,8 +41,10 @@ func (s *ExpiryScheduler) Register(endTime int64, orderHash string, offerKind st
 	})
 
 	//in case order hash existed before on the map - clear old timer & delete, set new
-	s.timers[orderHash].Stop()
-	delete(s.timers, orderHash)
+	if timer, ok := s.timers[orderHash]; ok {
+		timer.Stop()
+		delete(s.timers, orderHash)
+	}
 	s.timers[orderHash] = newTimer
 
 }

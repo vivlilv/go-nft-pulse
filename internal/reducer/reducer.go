@@ -1,6 +1,7 @@
 package reducer
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/vivlilv/go_nft_trader/internal/domain"
@@ -44,6 +45,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 			Maker:          domain.Address(e.MakerAddress),
 			OrderHash:      e.OrderHash,
 		}
+		fmt.Printf("%v", offer)
 
 		itemsToUpdate := selectAllItemsForSlug(&state, e.Slug) //TODO - Add Caching
 		for _, itemKey := range itemsToUpdate {

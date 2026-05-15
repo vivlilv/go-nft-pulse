@@ -39,7 +39,7 @@ func main() {
 
 	stateManager := domain.NewStateManager(state)
 
-	eventsCh, done := events_opensea.ListenEvents("fwogs")
+	eventsCh, done := events_opensea.ListenEvents("pudgypenguins")
 	runReducer(stateManager, eventsCh)
 	analytics.Run(stateManager)
 	<-done

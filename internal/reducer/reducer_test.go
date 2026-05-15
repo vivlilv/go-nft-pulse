@@ -12,12 +12,26 @@ func TestReduce(t *testing.T) {
 	//given
 	myAddress := domain.MyWallet.Address
 	state := domain.NewState("item_flip", "offer", "items.json") //FIXME - state should be set by setState only
+	NFT_ID := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/920"
+	NFT_ID_extra := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/111"
+	traits0 := []domain.TraitCriterion{
+		{
+			Type: "Body",
+			Name: "Ice Coat",
+		},
+	}
+	traits1 := []domain.TraitCriterion{
+		{
+			Type: "Body",
+			Name: "Ametyst",
+		},
+	}
+	slug := "pudgypenguins"
 
-	NFT_ID := "ethereum/0x8fe1a377b83921fe1429adb1b8fbfecd45de9cd8/4705"
 	event0 := domain.CollectionOfferEvent{ //base top offer - somebody else
 		EventType:    "collection_offer",
 		PriceWei:     big.NewInt(3300000000000000),
-		Slug:         "megalio-16",
+		Slug:         slug,
 		Chain:        "ethereum",
 		MakerAddress: "0xRANDOM",
 		OrderHash:    "0xRANDOMHASH",
@@ -27,7 +41,7 @@ func TestReduce(t *testing.T) {
 	event1 := domain.CollectionOfferEvent{
 		EventType:    "collection_offer",
 		PriceWei:     big.NewInt(5500000000000000),
-		Slug:         "megalio-16",
+		Slug:         slug,
 		Chain:        "ethereum",
 		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
 		OrderHash:    "0x166f10778be4ab4b81e5fa3f2479ab2c8e1206b4e21786483d9dcbad613659c4",
@@ -37,7 +51,7 @@ func TestReduce(t *testing.T) {
 	event2 := domain.CollectionOfferEvent{
 		EventType:    "collection_offer",
 		PriceWei:     big.NewInt(5500000000000000),
-		Slug:         "megalio-16",
+		Slug:         slug,
 		Chain:        "ethereum",
 		MakerAddress: "0xOTHERADDRESS",
 		OrderHash:    "0xOTHERHASH",
@@ -47,12 +61,42 @@ func TestReduce(t *testing.T) {
 	event3 := domain.CollectionOfferEvent{
 		EventType:    "collection_offer",
 		PriceWei:     big.NewInt(2000000000000000),
-		Slug:         "megalio-16",
+		Slug:         slug,
 		Chain:        "ethereum",
 		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
 		OrderHash:    "0xMYHASH",
 		UsdPrice:     12.55265,
 		EndTime:      1778585440,
+	}
+	event4 := domain.TraitOfferEvent{
+		EventType:         "trait_offer",
+		Slug:              slug,
+		PriceWei:          big.NewInt(5500000000000000),
+		MakerAddress:      "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		OrderHash:         "0xMYHASH",
+		UsdPrice:          12.55265,
+		EndTime:           1778585440,
+		TraitCriteriaList: traits0,
+	}
+	event5 := domain.TraitOfferEvent{
+		EventType:         "trait_offer",
+		Slug:              slug,
+		PriceWei:          big.NewInt(5500000000000000),
+		MakerAddress:      "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		OrderHash:         "0xMYHASH",
+		UsdPrice:          12.55265,
+		EndTime:           1778585440,
+		TraitCriteriaList: traits1,
+	}
+	event6 := domain.ItemReceivedOfferEvent{
+		EventType:    "item_received_offer",
+		Slug:         slug,
+		PriceWei:     big.NewInt(5500000000000000),
+		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		OrderHash:    "0xMYHASH",
+		UsdPrice:     12.55265,
+		EndTime:      1778585440,
+		NftID:        NFT_ID,
 	}
 	tests := []struct {
 		name          string
@@ -153,6 +197,74 @@ func TestReduce(t *testing.T) {
 
 				if item.TopOffer.OrderHash == event3.OrderHash {
 					t.Errorf("Top offer hash shouldn't be same as my offer")
+				}
+			},
+		},
+		{name: "#4: my trait offer(highest) >>> update both top offer/my offer ",
+			state: state,
+			event: event4,
+			setupState: func() *domain.State {
+				state := domain.NewState("item_flip", "offer", "items.json")
+				result := Reduce(*state, event0)
+				return &result
+			},
+			checkExpected: func(t *testing.T, state domain.State) {
+				item := state.Items[domain.NftID(NFT_ID)]
+
+				if item.MyOffer.PriceWei != event4.PriceWei {
+					t.Errorf("my offer priceWei diff")
+				}
+				if item.MyOffer.OrderHash != event4.OrderHash {
+					t.Errorf("my offer hash diff")
+				}
+				if item.MyOffer.ExpirationTime != event4.EndTime {
+					t.Errorf("my offer expirationTime diff")
+				}
+				if item.MyOffer.Maker != domain.Address(event4.MakerAddress) {
+					t.Errorf("my offer maker diff")
+				}
+
+				if item.TopOffer.OrderHash != event4.OrderHash {
+					t.Errorf("Should update both top offer and my offer")
+				}
+			},
+		},
+		{name: "#5: My trait offer(highest) >>> update NONE because trait mismatch ",
+			state: state,
+			event: event5,
+			setupState: func() *domain.State {
+				state := domain.NewState("item_flip", "offer", "items.json")
+				result := Reduce(*state, event0)
+				return &result
+			},
+			checkExpected: func(t *testing.T, state domain.State) {
+				item := state.Items[domain.NftID(NFT_ID)]
+
+				if item.MyOffer.OrderHash == event5.OrderHash {
+					t.Errorf("my offer shouldn't change")
+				}
+				if item.TopOffer.OrderHash == event5.OrderHash {
+					t.Errorf("top offer shouldn't change")
+				}
+			},
+		},
+		{name: "#6: My item offer(highest) >>> update 1/2 because nft_id mismatch",
+			state: state,
+			event: event6,
+			setupState: func() *domain.State {
+				state := domain.NewState("item_flip", "offer", "items.json")
+				result := Reduce(*state, event0)
+				return &result
+			},
+			checkExpected: func(t *testing.T, state domain.State) {
+				item1 := state.Items[domain.NftID(NFT_ID)]
+				item2 := state.Items[domain.NftID(NFT_ID_extra)]
+
+				if item1.MyOffer.OrderHash != event6.OrderHash {
+					t.Errorf("my offer on item1 not  changed")
+				}
+				if item2.TopOffer.OrderHash == event6.OrderHash {
+					t.Errorf("my offer shouldn't change on wrong item")
 				}
 			},
 		},

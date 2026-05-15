@@ -3,7 +3,22 @@
 ## Project
 Pet project to practice Golang and build a useful NFT trading bot.
 Architecture: event-driven (events → reducer → state → strategy → execution layers).
-Currently implemented: events layer (OpenSea marketplace events).
+
+## Current Status
+Implemented:
+- **events layer** — OpenSea WebSocket events, parsed into domain types (`internal/events/opensea/`)
+- **reducer layer** — pure function, handles collection/trait/item offers + cancels + sales (`internal/reducer/`)
+- **analytics TUI** — bubbletea live table, tick-based 200ms state snapshot (`internal/analytics/`)
+- **offer expiration** — synthetic `ExpiredOfferEvent` via `ExpiryScheduler` + `time.AfterFunc` (`internal/events/opensea/expiry.go`) — implemented, needs integration testing
+
+Next up: strategy layer (decide when/what to bid based on state)
+
+## Architecture Notes (for AI to load fast)
+- `domain.Event` is an empty interface; reducer type-switches on **value types** (e.g. `domain.CollectionOfferEvent`, not pointer)
+- `StateManager` owns a `sync.RWMutex` + `*State` — all concurrent reads go through `Snapshot()`, writes through `UpdateStateItems()`
+- `State.Items` is keyed by `domain.NftID` (full string: `"chain/contract/tokenID"`); items must have `Slug` set in `items.json` for slug-based filtering to work
+- Reducer helpers: `selectAllItemsForSlug`, `filterItemsByTraits` (filters by slug first, then traits), `applyOffer`, `clearOffer`
+- Logs redirect to `nft_trader.log`; TUI runs in alt screen
 
 ## My Goal
 Learn while building. New concepts, best practices, real production-like patterns.
