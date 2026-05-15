@@ -66,6 +66,7 @@ func (s *State) Snapshot() State {
 	deepCopyItems := map[NftID]ItemState{}
 	for _, item := range s.Items {
 		deepCopyItems[NftID(item.NftID)] = ItemState{
+			Slug:             item.Slug,
 			NftID:            item.NftID,
 			IsPending:        item.IsPending,
 			TokenID:          item.TokenID,
@@ -85,6 +86,7 @@ func (s *State) Snapshot() State {
 }
 
 type ItemState struct {
+	Slug             string //used for collection wide filter
 	NftID            string
 	IsPending        bool //whether currently doing some operation(place offer etc)
 	TokenID          int

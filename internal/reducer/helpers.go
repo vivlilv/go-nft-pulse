@@ -4,36 +4,42 @@ import (
 	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
-func filterItemsByTraits(traits []domain.TraitCriterion, state *domain.State) []domain.NftID {
-	itemsList := []domain.NftID{}
+func filterItemsByTraits(state *domain.State, slug string, traits []domain.TraitCriterion) []domain.NftID {
+	itemsList := selectAllItemsForSlug(state, slug)
+	result := make([]domain.NftID, 0, len(itemsList)) //prealloc to avoid realloc space
 
-	for _, i := range state.Items {
-		hasAllTraits := true
-		for _, t := range traits {
-			foundTrait := false
-			for _, k := range i.Traits {
-				if t == k {
-					foundTrait = true
-					break
-				}
-			}
-			if !foundTrait {
-				hasAllTraits = false
+	for _, i := range itemsList {
+		item := state.Items[i]
+		if itemHasAllTraits(item, traits) {
+			result = append(result, domain.NftID(i))
+		}
+	}
+	return result
+}
+
+func itemHasAllTraits(item domain.ItemState, traits []domain.TraitCriterion) bool {
+	for _, t := range traits {
+		found := false
+		for _, i := range item.Traits {
+			if t == i {
+				found = true
 				break
 			}
 		}
-		if hasAllTraits {
-			itemsList = append(itemsList, domain.NftID(i.NftID))
+		if !found {
+			return false
 		}
 	}
-	return itemsList
+	return true
 }
 
-func selectAllItems(state *domain.State) []domain.NftID {
+func selectAllItemsForSlug(state *domain.State, slug string) []domain.NftID {
 	itemsList := []domain.NftID{}
 
 	for _, i := range state.Items {
-		itemsList = append(itemsList, domain.NftID(i.NftID))
+		if i.Slug == slug {
+			itemsList = append(itemsList, domain.NftID(i.NftID))
+		}
 	}
 	return itemsList
 }

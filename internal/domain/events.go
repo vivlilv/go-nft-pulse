@@ -91,3 +91,11 @@ type TraitOfferEvent struct {
 	EndTime           int64
 	TraitCriteriaList []TraitCriterion
 }
+
+type ExpiredOfferEvent struct {
+	OrderHash string
+	OfferKind string // "item", "collection", "trait"
+	Slug      string
+	NftID     string
+	Traits    []TraitCriterion
+}

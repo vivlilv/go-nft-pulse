@@ -85,6 +85,7 @@ func HandleEvents(
 	eventsCh chan<- domain.Event,
 	errChanKeepAlive chan error,
 	quit chan os.Signal,
+	expiryScheduler *ExpiryScheduler,
 ) {
 	go func() {
 		for {
@@ -94,6 +95,7 @@ func HandleEvents(
 				eventType := GetEventType(data)
 				event, err := ProcessEvent(eventType, data)
 				if err == nil {
+					ScheduleExpiration(expiryScheduler, event)
 					eventsCh <- event
 				}
 			case <-quit:
@@ -124,11 +126,11 @@ func ListenEvents(collectionSlug string) (<-chan domain.Event, <-chan struct{}) 
 	quit := make(chan os.Signal, 1)
 	errChanKeepAlive := make(chan error) //to catch errors from goroutine
 	signal.Notify(quit, os.Interrupt)
-
+	scheduler := NewExpiryScheduler(eventsCh)
 	listener.KeepAlive(errChanKeepAlive)
 
 	ReadMessages(listener, rawCh, errChanKeepAlive)
-	HandleEvents(listener, rawCh, eventsCh, errChanKeepAlive, quit)
+	HandleEvents(listener, rawCh, eventsCh, errChanKeepAlive, quit, scheduler)
 
 	return eventsCh, listener.Done()
 }
