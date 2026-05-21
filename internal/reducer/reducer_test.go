@@ -175,7 +175,7 @@ func TestReduce(t *testing.T) {
 			event: event3,
 			setupState: func() *domain.State {
 				state := domain.NewState("item_flip", "offer", "items.json")
-				result := Reduce(*state, event0)
+				result, _ := Reduce(*state, event0)
 				return &result
 
 			},
@@ -205,7 +205,7 @@ func TestReduce(t *testing.T) {
 			event: event4,
 			setupState: func() *domain.State {
 				state := domain.NewState("item_flip", "offer", "items.json")
-				result := Reduce(*state, event0)
+				result, _ := Reduce(*state, event0)
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
@@ -234,7 +234,7 @@ func TestReduce(t *testing.T) {
 			event: event5,
 			setupState: func() *domain.State {
 				state := domain.NewState("item_flip", "offer", "items.json")
-				result := Reduce(*state, event0)
+				result, _ := Reduce(*state, event0)
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
@@ -253,7 +253,7 @@ func TestReduce(t *testing.T) {
 			event: event6,
 			setupState: func() *domain.State {
 				state := domain.NewState("item_flip", "offer", "items.json")
-				result := Reduce(*state, event0)
+				result, _ := Reduce(*state, event0)
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
@@ -278,7 +278,7 @@ func TestReduce(t *testing.T) {
 			log1, _ := json.MarshalIndent(state, "", "  ")
 			t.Logf("State setup:\n%s", log1)
 			// when
-			result := Reduce(*state, tt.event)
+			result, _ := Reduce(*state, tt.event)
 
 			// then
 			tt.checkExpected(t, result)

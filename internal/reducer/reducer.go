@@ -7,7 +7,7 @@ import (
 	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
-func Reduce(state domain.State, event domain.Event) domain.State {
+func Reduce(state domain.State, event domain.Event) (domain.State, []domain.NftID) {
 	switch e := event.(type) {
 
 	case domain.ItemReceivedOfferEvent:
@@ -21,7 +21,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 
 		applyOffer(&state, key, offer)
 
-		return state
+		return state, []domain.NftID{key}
 
 	case domain.TraitOfferEvent:
 		traitsFilter := e.TraitCriteriaList
@@ -36,7 +36,7 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		for _, itemKey := range itemsToUpdate {
 			applyOffer(&state, itemKey, offer)
 		}
-		return state
+		return state, itemsToUpdate
 
 	case domain.CollectionOfferEvent:
 		offer := domain.OfferBase{
@@ -51,17 +51,17 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 		for _, itemKey := range itemsToUpdate {
 			applyOffer(&state, itemKey, offer)
 		}
-		return state
+		return state, itemsToUpdate
 
 	case domain.ItemSoldEvent: //FIXME - can be offer or listing sold;
 		key := domain.NftID(e.NftID)
 		clearOffer(&state, key, e.OrderHash)
-		return state
+		return state, []domain.NftID{key}
 
 	case domain.ItemCancelledEvent: //FIXME - can be offer or listing cancel;
 		key := domain.NftID(e.NftID)
 		clearOffer(&state, key, e.OrderHash)
-		return state
+		return state, []domain.NftID{key}
 
 	case domain.ExpiredOfferEvent:
 		switch e.OfferKind {
@@ -86,5 +86,5 @@ func Reduce(state domain.State, event domain.Event) domain.State {
 	default:
 		log.Printf("Reducer: unhandled event type: %T", e)
 	}
-	return state
+	return state, []domain.NftID{}
 }

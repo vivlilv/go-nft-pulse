@@ -8,20 +8,20 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/vivlilv/go_nft_trader/internal/analytics"
 	"github.com/vivlilv/go_nft_trader/internal/domain"
 	domain_state "github.com/vivlilv/go_nft_trader/internal/domain"
 	events_opensea "github.com/vivlilv/go_nft_trader/internal/events/opensea"
 	"github.com/vivlilv/go_nft_trader/internal/reducer"
+	"github.com/vivlilv/go_nft_trader/internal/strategy"
 )
 
 func main() {
-	logFile, err := os.OpenFile("nft_trader.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatalf("failed to open log file: %v", err)
-	}
-	defer logFile.Close()
-	log.SetOutput(logFile)
+	// logFile, err := os.OpenFile("nft_trader.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	// if err != nil {
+	// 	log.Fatalf("failed to open log file: %v", err)
+	// }
+	// defer logFile.Close()
+	// log.SetOutput(logFile)
 
 	fmt.Println("Starting NFT Trader...")
 	state := domain_state.NewState("item_flip", "offer", "items.json")
@@ -40,18 +40,27 @@ func main() {
 	stateManager := domain.NewStateManager(state)
 
 	eventsCh, done := events_opensea.ListenEvents("pudgypenguins")
-	runReducer(stateManager, eventsCh)
-	analytics.Run(stateManager)
+
+	strategyCoordinator := strategy.NewStrategyCoordinator()
+	strategyCoordinator.Run()
+	reducerMsgCh := strategyCoordinator.ReducerChan()
+
+	runReducer(stateManager, eventsCh, reducerMsgCh)
+	// analytics.Run(stateManager)
 	<-done
 }
 
-func runReducer(stateManager *domain.StateManager, eventsCh <-chan domain.Event) {
+func runReducer(stateManager *domain.StateManager, eventsCh <-chan domain.Event, reducerMsgCh chan<- strategy.ReducerMessage) {
 	go func() {
 		for event := range eventsCh {
 			state := stateManager.GetState()
-			updatedState := reducer.Reduce(*state, event)
+			updatedState, affectedItems := reducer.Reduce(*state, event)
 			stateManager.UpdateStateItems(updatedState.Items)
 
+			reducerMsgCh <- strategy.ReducerMessage{
+				State:         updatedState,
+				AffectedItems: affectedItems,
+			}
 		}
 	}()
 }
