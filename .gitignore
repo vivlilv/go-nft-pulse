@@ -1,5 +1,4 @@
 .env
 testdata/*
 items.json
-*.md
 *.log
