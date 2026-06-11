@@ -10,18 +10,21 @@ import (
 	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
-func GetEventType(data []byte) string {
-	// fmt.Printf("Raw event: %s\n", data) // << inspect here
-
-	var msg WSMessage
-	err := json.Unmarshal(data, &msg)
-	if err != nil {
-		fmt.Printf("Unmarshal error: %v\n", err)
-		return ""
+// Opensea changed the format from json obj to array:
+// parseMessage extracts event type and payload from Phoenix array format:
+// [join_ref, ref, topic, event, payload]
+func parseMessage(data []byte) (eventType string, payload []byte, err error) {
+	var parts []json.RawMessage
+	if err := json.Unmarshal(data, &parts); err != nil || len(parts) < 5 {
+		return "", nil, fmt.Errorf("unexpected message format")
 	}
 
-	// fmt.Printf("Received event type: %q\n", msg.EventType)
-	return msg.EventType
+	if err := json.Unmarshal(parts[3], &eventType); err != nil {
+		return "", nil, fmt.Errorf("extracting event type: %w", err)
+	}
+	// wrap to preserve the double Payload.Payload nesting in unmarshalers
+	//FIXME this additional wrapper is because all the methods rely on older architecture
+	return eventType, fmt.Appendf(nil, `{"payload":%s}`, parts[4]), nil
 }
 
 func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
@@ -33,8 +36,8 @@ func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
 		e = &ItemSold{}
 	case "item_received_offer":
 		e = &ItemReceivedOffer{}
-	// case "item_received_bid":
-	// 	e = &ItemReceivedBid{}
+	case "item_received_bid":
+		e = &ItemReceivedOffer{} //TODO item received bid should have its own struct
 	case "item_cancelled":
 		e = &ItemCancelled{}
 	case "collection_offer":
@@ -42,7 +45,6 @@ func ProcessEvent(eventType string, data []byte) (domain.Event, error) {
 	case "trait_offer":
 		e = &TraitOffer{}
 	default:
-		// log.Printf("Unknown event type: %s", eventType)
 		return nil, fmt.Errorf("unknown event type: %s", eventType)
 	}
 
@@ -92,14 +94,19 @@ func HandleEvents(
 			select {
 			case data := <-rawCh:
 				// fmt.Println(string(data))
-				eventType := GetEventType(data)
+				eventType, data, err := parseMessage(data)
+				if err != nil {
+					fmt.Printf("Parsing message: %v\n", err)
+					continue //skip msg if parsing fails
+				}
 				event, err := ProcessEvent(eventType, data)
 				if err == nil {
 					ScheduleExpiration(expiryScheduler, event)
 					eventsCh <- event
 				}
 			case <-quit:
-				if err := listener.Close(); err != nil { //closing the websocket.Conn will stop readMsg cycle
+				//closing the websocket.Conn will stop readMsg cycle
+				if err := listener.Close(); err != nil {
 					fmt.Println("Error closing connection:", err)
 				} else {
 					fmt.Println("Closed successfully")

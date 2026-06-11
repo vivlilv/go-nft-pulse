@@ -8,17 +8,17 @@ Architecture: event-driven (events → reducer → state → strategy → execut
 Implemented:
 - **events layer** — OpenSea WebSocket events, parsed into domain types (`internal/events/opensea/`)
 - **reducer layer** — pure function, handles collection/trait/item offers + cancels + sales (`internal/reducer/`)
-- **analytics TUI** — bubbletea live table, tick-based 200ms state snapshot (`internal/analytics/`)
 - **offer expiration** — synthetic `ExpiredOfferEvent` via `ExpiryScheduler` + `time.AfterFunc` (`internal/events/opensea/expiry.go`) — implemented, needs integration testing
-
-Next up: strategy layer (decide when/what to bid based on state)
+- **strategy layer** - currently on hold, implemented partially
 
 ## Architecture Notes (for AI to load fast)
 - `domain.Event` is an empty interface; reducer type-switches on **value types** (e.g. `domain.CollectionOfferEvent`, not pointer)
-- `StateManager` owns a `sync.RWMutex` + `*State` — all concurrent reads go through `Snapshot()`, writes through `UpdateStateItems()`
 - `State.Items` is keyed by `domain.NftID` (full string: `"chain/contract/tokenID"`); items must have `Slug` set in `items.json` for slug-based filtering to work
 - Reducer helpers: `selectAllItemsForSlug`, `filterItemsByTraits` (filters by slug first, then traits), `applyOffer`, `clearOffer`
-- Logs redirect to `nft_trader.log`; TUI runs in alt screen
+
+## Key decisions
+- *big.Int fields in ItemState are treated as immutable - never mutated in-place. New values are always created with new(big.Int). This makes Snapshot() safe without deep-copying them.
+- The reason *state is passed to Reduce is: you want to pass state by value (a copy) so the reducer can't accidentally mutate the live state. The * is just dereferencing the pointer to get a value copy. That way old state remains unchanged until the new state atomically updated is replacing old one in stateManager.
 
 ## My Goal
 Learn while building. New concepts, best practices, real production-like patterns.

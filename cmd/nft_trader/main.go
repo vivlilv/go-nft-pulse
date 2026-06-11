@@ -9,58 +9,51 @@ import (
 	"syscall"
 
 	"github.com/vivlilv/go_nft_trader/internal/domain"
-	domain_state "github.com/vivlilv/go_nft_trader/internal/domain"
 	events_opensea "github.com/vivlilv/go_nft_trader/internal/events/opensea"
 	"github.com/vivlilv/go_nft_trader/internal/reducer"
 	"github.com/vivlilv/go_nft_trader/internal/strategy"
+	"github.com/vivlilv/go_nft_trader/web"
 )
 
 func main() {
-	// logFile, err := os.OpenFile("nft_trader.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	// if err != nil {
-	// 	log.Fatalf("failed to open log file: %v", err)
-	// }
-	// defer logFile.Close()
-	// log.SetOutput(logFile)
-
 	fmt.Println("Starting NFT Trader...")
-	state := domain_state.NewState("item_flip", "offer", "items.json")
-	b, _ := json.MarshalIndent(state, "", "  ")
-	fmt.Println(string(b))
+	state := domain.NewState("item_flip", "offer", "items.json")
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		stateJSON, _ := json.MarshalIndent(state, "", "  ")
-		log.Printf("final state:\n%s", stateJSON)
-		os.Exit(0)
-	}()
-
-	stateManager := domain.NewStateManager(state)
+	stateManager := domain.NewStateManager(*state)
+	server := web.NewServer(stateManager)
+	strategyCoordinator := strategy.NewStrategyCoordinator()
+	reducerMsgCh := strategyCoordinator.ReducerChan()
 
 	eventsCh, done := events_opensea.ListenEvents("pudgypenguins")
 
-	strategyCoordinator := strategy.NewStrategyCoordinator()
-	strategyCoordinator.Run()
-	reducerMsgCh := strategyCoordinator.ReducerChan()
+	go server.Run()
+	go logFinalState(stateManager)
+	go runReducer(stateManager, eventsCh, reducerMsgCh)
+	go strategyCoordinator.Run()
 
-	runReducer(stateManager, eventsCh, reducerMsgCh)
-	// analytics.Run(stateManager)
 	<-done
 }
 
 func runReducer(stateManager *domain.StateManager, eventsCh <-chan domain.Event, reducerMsgCh chan<- strategy.ReducerMessage) {
-	go func() {
-		for event := range eventsCh {
-			state := stateManager.GetState()
-			updatedState, affectedItems := reducer.Reduce(*state, event)
-			stateManager.UpdateStateItems(updatedState.Items)
+	for event := range eventsCh {
+		state := stateManager.GetState()
+		updatedState, affectedItems := reducer.Reduce(state, event)
+		stateManager.UpdateState(updatedState)
 
-			reducerMsgCh <- strategy.ReducerMessage{
-				State:         updatedState,
-				AffectedItems: affectedItems,
-			}
+		reducerMsgCh <- strategy.ReducerMessage{ //FIXME - ? do i need to pass whole state(or strategy can ask it from stateManager)
+			State:         updatedState,
+			AffectedItems: affectedItems,
 		}
-	}()
+	}
+}
+
+// when the program receives an interrupt signal, print the final state before exiting
+func logFinalState(sm *domain.StateManager) {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+	state := sm.GetState()
+	stateJSON, _ := json.MarshalIndent(state, "", "  ")
+	log.Printf("final state:\n%s", stateJSON)
+	os.Exit(0)
 }

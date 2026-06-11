@@ -24,31 +24,27 @@ var MyWallet = &MyWalletConfig{}
 type NftID string
 type Address string
 type TraitCriterion struct {
-	Name string `json:"trait_name"`
-	Type string `json:"trait_type"`
+	TraitType  string `json:"trait_type"` // category: "Background"
+	TraitValue string `json:"trait_name"` // specific value: "Purple"
 }
 
 type StateManager struct {
 	mu    sync.RWMutex
-	state *State
+	state State
 }
 
-func (m *StateManager) GetState() *State {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	return m.state
-}
-
-func (m *StateManager) UpdateStateItems(Items map[NftID]ItemState) {
-	m.mu.Lock()
-	m.state.Items = Items
-	m.mu.Unlock()
-}
-
-func (m *StateManager) Snapshot() State {
+// GetState returns a snapshot copy of the current State
+// safe to modify this copy
+func (m *StateManager) GetState() State {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.state.Snapshot()
+}
+
+func (m *StateManager) UpdateState(newState State) {
+	m.mu.Lock()
+	m.state = newState
+	m.mu.Unlock()
 }
 
 type State struct {
@@ -58,11 +54,14 @@ type State struct {
 	Items map[NftID]ItemState
 }
 
-func NewStateManager(s *State) *StateManager {
+// NewStateManager initializes StateManager with a given State;StateManager is used to manage concurrent access to State across different goroutines
+func NewStateManager(s State) *StateManager {
 	return &StateManager{state: s}
 }
 
-func (s *State) Snapshot() State {
+// Snapshot creates a deep copy of the State
+// cruicial because map is reference type;without deep copy, concurrent reads/writes can lead to race conditions
+func (s State) Snapshot() State {
 	deepCopyItems := map[NftID]ItemState{}
 	for _, item := range s.Items {
 		deepCopyItems[NftID(item.NftID)] = ItemState{
@@ -75,6 +74,7 @@ func (s *State) Snapshot() State {
 			TopOffer:         item.TopOffer,
 			MyOffer:          item.MyOffer,
 			Traits:           item.Traits,
+			ImgURL:           item.ImgURL,
 		}
 	}
 
@@ -95,6 +95,7 @@ type ItemState struct {
 	TopOffer         OfferBase
 	MyOffer          OfferBase        //YAGNI - for now only per item bid;* if nil
 	Traits           []TraitCriterion //each nft has traits;to query trait offers
+	ImgURL           string
 }
 
 type OfferBase struct {

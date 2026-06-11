@@ -18,6 +18,7 @@ const (
 	logPanic                // mY, tY, m>t
 )
 
+// classify the situation of the item based on my offer and the top offer
 func classify(item domain.ItemState) situation {
 	myOffer := item.MyOffer
 	topOffer := item.TopOffer

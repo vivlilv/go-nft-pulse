@@ -60,31 +60,30 @@ func (s *StrategyCoordinator) Has(id domain.NftID) bool {
 }
 
 func (s *StrategyCoordinator) Run() {
-	go func() {
-		for {
-			select {
-			case msg := <-s.reducerOutput: //reducer call to run strategy
-				//check for pendingItems if not already processing.
-				//call strategy to produce intent
-				//send intent to executor
-				for _, id := range msg.AffectedItems {
-					isPending := s.Has(id)
-					if !isPending {
-						s.Add(id)
-						intent := Strategy(msg.State, id)
-						//pass intent to executor via channel
-						log.Printf("INTENT: %T", intent)
-					}
-
+	for {
+		select {
+		case msg := <-s.reducerOutput:
+			//reducer call to run strategy
+			//check for pendingItems if not already processing.
+			//call strategy to produce intent
+			//send intent to executor
+			for _, id := range msg.AffectedItems {
+				isPending := s.Has(id)
+				if !isPending {
+					s.Add(id)
+					intent := Strategy(msg.State, id)
+					//pass intent to executor via channel
+					log.Printf("INTENT: %T", intent)
 				}
 
-			case res := <-s.executorResult: //executor result to update pendingItems
-				//recieve executorResult and update Coordinator(change pendingItems, potentially use optimistic updates)
-				//TODO - implement this(placeholder for now)
-				log.Printf("%v", res)
 			}
+
+		case res := <-s.executorResult: //executor result to update pendingItems
+			//recieve executorResult and update Coordinator(change pendingItems, potentially use optimistic updates)
+			//TODO - implement this(placeholder for now)
+			log.Printf("%v", res)
 		}
-	}()
+	}
 }
 
 func NewStrategyCoordinator() *StrategyCoordinator {

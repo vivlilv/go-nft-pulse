@@ -7,6 +7,7 @@ import (
 	"github.com/vivlilv/go_nft_trader/internal/domain"
 )
 
+// Reduce takes the current state and an event, and returns the new state along with a list of affected NftIDs.
 func Reduce(state domain.State, event domain.Event) (domain.State, []domain.NftID) {
 	switch e := event.(type) {
 
@@ -47,7 +48,7 @@ func Reduce(state domain.State, event domain.Event) (domain.State, []domain.NftI
 		}
 		fmt.Printf("%v", offer)
 
-		itemsToUpdate := selectAllItemsForSlug(&state, e.Slug) //TODO - Add Caching
+		itemsToUpdate := selectAllItemsForSlug(&state, e.Slug)
 		for _, itemKey := range itemsToUpdate {
 			applyOffer(&state, itemKey, offer)
 		}

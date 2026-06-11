@@ -14,10 +14,6 @@ type Event interface {
 	ToDomainEvent() (domain.Event, error)
 }
 
-type WSMessage struct {
-	EventType string `json:"event"`
-}
-
 type ItemListed struct {
 	EventType    string
 	PriceWei     *big.Int
@@ -567,8 +563,8 @@ func (e *TraitOffer) UnmarshalJSON(data []byte) error {
 	e.TraitCriteriaList = make([]domain.TraitCriterion, 0, len(temp.Payload.Payload.TraitCriteriaList))
 	for _, tc := range temp.Payload.Payload.TraitCriteriaList {
 		e.TraitCriteriaList = append(e.TraitCriteriaList, domain.TraitCriterion{
-			Name: tc.TraitName,
-			Type: tc.TraitType,
+			TraitType:  tc.TraitType,
+			TraitValue: tc.TraitName,
 		})
 	}
 

@@ -1,7 +1,6 @@
 package reducer
 
 import (
-	"encoding/json"
 	"math/big"
 	"testing"
 
@@ -11,19 +10,24 @@ import (
 func TestReduce(t *testing.T) {
 	//given
 	myAddress := domain.MyWallet.Address
+
 	state := domain.NewState("item_flip", "offer", "items.json") //FIXME - state should be set by setState only
-	NFT_ID := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/920"
-	NFT_ID_extra := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/111"
+	NFTID1 := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/920"
+	NFTID2 := "ethereum/0xbd3531da5cf5857e7cfaa92426877b022e612cf8/111"
 	traits0 := []domain.TraitCriterion{
 		{
-			Type: "Body",
-			Name: "Ice Coat",
+			TraitType:  "Background",
+			TraitValue: "Tangerine",
+		},
+		{
+			TraitType:  "Skin",
+			TraitValue: "Olive Green",
 		},
 	}
 	traits1 := []domain.TraitCriterion{
 		{
-			Type: "Body",
-			Name: "Ametyst",
+			TraitType:  "Body",
+			TraitValue: "Ametyst",
 		},
 	}
 	slug := "pudgypenguins"
@@ -43,7 +47,7 @@ func TestReduce(t *testing.T) {
 		PriceWei:     big.NewInt(5500000000000000),
 		Slug:         slug,
 		Chain:        "ethereum",
-		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		MakerAddress: string(myAddress),
 		OrderHash:    "0x166f10778be4ab4b81e5fa3f2479ab2c8e1206b4e21786483d9dcbad613659c4",
 		UsdPrice:     12.55265,
 		EndTime:      1778585440,
@@ -63,7 +67,7 @@ func TestReduce(t *testing.T) {
 		PriceWei:     big.NewInt(2000000000000000),
 		Slug:         slug,
 		Chain:        "ethereum",
-		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		MakerAddress: string(myAddress),
 		OrderHash:    "0xMYHASH",
 		UsdPrice:     12.55265,
 		EndTime:      1778585440,
@@ -72,7 +76,7 @@ func TestReduce(t *testing.T) {
 		EventType:         "trait_offer",
 		Slug:              slug,
 		PriceWei:          big.NewInt(5500000000000000),
-		MakerAddress:      "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		MakerAddress:      string(myAddress),
 		OrderHash:         "0xMYHASH",
 		UsdPrice:          12.55265,
 		EndTime:           1778585440,
@@ -92,11 +96,11 @@ func TestReduce(t *testing.T) {
 		EventType:    "item_received_offer",
 		Slug:         slug,
 		PriceWei:     big.NewInt(5500000000000000),
-		MakerAddress: "0x54c6d73baf9dd8612978b694b23a309263b54cfa",
+		MakerAddress: string(myAddress),
 		OrderHash:    "0xMYHASH",
 		UsdPrice:     12.55265,
 		EndTime:      1778585440,
-		NftID:        NFT_ID,
+		NftID:        NFTID1,
 	}
 	tests := []struct {
 		name          string
@@ -113,7 +117,7 @@ func TestReduce(t *testing.T) {
 				return domain.NewState("item_flip", "offer", "items.json")
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item := state.Items[domain.NftID(NFT_ID)]
+				item := state.Items[domain.NftID(NFTID1)]
 
 				if item.TopOffer.PriceWei != event1.PriceWei {
 					t.Errorf("top offer priceWei diff %v %v", item.TopOffer.PriceWei, event1.PriceWei)
@@ -149,7 +153,7 @@ func TestReduce(t *testing.T) {
 				return domain.NewState("item_flip", "offer", "items.json")
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item := state.Items[domain.NftID(NFT_ID)]
+				item := state.Items[domain.NftID(NFTID1)]
 
 				if item.TopOffer.PriceWei != event2.PriceWei {
 					t.Errorf("top offer priceWei diff")
@@ -180,7 +184,7 @@ func TestReduce(t *testing.T) {
 
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item := state.Items[domain.NftID(NFT_ID)]
+				item := state.Items[domain.NftID(NFTID1)]
 
 				if item.MyOffer.PriceWei != event3.PriceWei {
 					t.Errorf("my offer priceWei diff")
@@ -209,7 +213,7 @@ func TestReduce(t *testing.T) {
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item := state.Items[domain.NftID(NFT_ID)]
+				item := state.Items[domain.NftID(NFTID1)]
 
 				if item.MyOffer.PriceWei != event4.PriceWei {
 					t.Errorf("my offer priceWei diff")
@@ -238,7 +242,7 @@ func TestReduce(t *testing.T) {
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item := state.Items[domain.NftID(NFT_ID)]
+				item := state.Items[domain.NftID(NFTID1)]
 
 				if item.MyOffer.OrderHash == event5.OrderHash {
 					t.Errorf("my offer shouldn't change")
@@ -257,8 +261,8 @@ func TestReduce(t *testing.T) {
 				return &result
 			},
 			checkExpected: func(t *testing.T, state domain.State) {
-				item1 := state.Items[domain.NftID(NFT_ID)]
-				item2 := state.Items[domain.NftID(NFT_ID_extra)]
+				item1 := state.Items[domain.NftID(NFTID1)]
+				item2 := state.Items[domain.NftID(NFTID2)]
 
 				if item1.MyOffer.OrderHash != event6.OrderHash {
 					t.Errorf("my offer on item1 not  changed")
@@ -275,15 +279,15 @@ func TestReduce(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// fresh state for each case
 			state := tt.setupState()
-			log1, _ := json.MarshalIndent(state, "", "  ")
-			t.Logf("State setup:\n%s", log1)
+			// log1, _ := json.MarshalIndent(state, "", "  ")
+			// t.Logf("State setup:\n%s", log1)
 			// when
 			result, _ := Reduce(*state, tt.event)
 
 			// then
 			tt.checkExpected(t, result)
-			log2, _ := json.MarshalIndent(result, "", "  ")
-			t.Logf("State after reduce:\n%s", log2)
+			// log2, _ := json.MarshalIndent(result, "", "  ")
+			// t.Logf("State after reduce:\n%s", log2)
 		})
 	}
 
